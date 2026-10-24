@@ -1,0 +1,27 @@
+name: Build my ClassiClient
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Windows compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install gcc-mingw-w64-i686
+
+      - name: Build 32-bit Windows OpenGL exe
+        run: |
+          make windows RELEASE=1 TARGET=ClassiClient-Custom CC=i686-w64-mingw32-gcc \
+            EXTRA_CFLAGS="-fno-stack-protector -DCC_NOMAIN -fno-ident -DCC_GFX_BACKEND=CC_GFX_BACKEND_GL1" \
+            EXTRA_LDFLAGS="-nostartfiles -Wl,-e_main_real"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ClassiClient-Custom
+          path: ClassiClient-Custom.exe
